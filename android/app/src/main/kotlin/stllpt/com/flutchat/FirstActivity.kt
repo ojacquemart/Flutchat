@@ -2,7 +2,9 @@ package stllpt.com.flutchat
 
 import android.content.Intent
 import android.os.Bundle
-import io.flutter.app.FlutterActivity
+import androidx.annotation.NonNull
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
 import java.text.DecimalFormat
@@ -62,17 +64,12 @@ class FirstActivity : FlutterActivity() {
         return df.format(this)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        GeneratedPluginRegistrant.registerWith(this)
-        MethodChannel(flutterView, "com.stl.flutchat/opentok")
-                .setMethodCallHandler { methodCall, result ->
-                    methodCall.method?.let {
-                        if (it.contentEquals("openVideoChat")) {
-                            this@FirstActivity.result = result
-                            startActivityForResult(Intent( this, VideoActivity::class.java), 300)
-                        }
-                    }
+    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+        GeneratedPluginRegistrant.registerWith(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.stl.flutchat/opentok")
+                .setMethodCallHandler { _, result ->
+                    this@FirstActivity.result = result
+                    startActivityForResult(Intent(this, VideoActivity::class.java), 300)
                 }
     }
 
